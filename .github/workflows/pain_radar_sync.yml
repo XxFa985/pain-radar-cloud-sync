@@ -1,0 +1,85 @@
+name: Pain Radar OS · Multi-Dimensional Cloud Sync
+
+on:
+  schedule:
+    # Daily at 22:30 UTC (06:30 Beijing Time) — ready before 07:30 morning radar review
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Sync mode: full (first backfill / weekly) or incremental (daily delta)"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - full
+          - incremental
+      lookback_days:
+        description: "Incremental lookback window in days (anti-miss buffer)"
+        required: false
+        default: "14"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  collect-pain-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Multi-Dimensional Pain Data Collector
+        env:
+          OPENFDA_API_KEY: ${{ secrets.OPENFDA_API_KEY }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          LOOKBACK="${{ github.event.inputs.lookback_days || '14' }}"
+          if [ -z "$MODE" ]; then
+            # On scheduled runs: Sunday runs full backfill, Mon-Sat runs 14-day rolling incremental
+            DOW=$(date -u +%u)
+            if [ "$DOW" = "7" ] || [ ! -f "data/pain_radar_bundle.json.gz" ]; then
+              MODE="full"
+            else
+              MODE="incremental"
+            fi
+          fi
+          echo "Running collector in mode=$MODE (lookback=$LOOKBACK days)..."
+          python collect_pain_bundle.py --mode "$MODE" --lookback-days "$LOOKBACK" --out-dir data
+
+      - name: Write Job Summary
+        if: always()
+        run: |
+          if [ -f "data/sync_summary.md" ]; then
+            cat data/sync_summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Pain Radar Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pain-radar-bundle-${{ github.run_number }}
+          path: |
+            data/pain_radar_bundle.json
+            data/pain_radar_bundle.json.gz
+            data/sync_summary.md
+          retention-days: 14
+
+      - name: Commit updated bundle to repository
+        run: |
+          git config user.name "pain-radar-bot"
+          git config user.email "pain-radar-bot@users.noreply.github.com"
+          git add data/pain_radar_bundle.json data/pain_radar_bundle.json.gz data/sync_summary.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore(sync): update multi-dimensional pain radar bundle ($(date -u +%Y-%m-%d))"
+            git push
+          fi
