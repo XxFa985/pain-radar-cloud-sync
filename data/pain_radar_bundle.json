@@ -1,38 +1,38 @@
 {
   "bundle_version": "2.0",
-  "generated_at": "2026-11-21 14:03:21 UTC",
-  "generated_date": "2026-11-21",
+  "generated_at": "2026-11-22 02:26:45 UTC",
+  "generated_date": "2026-11-22",
   "mode": "full",
   "meta": {
     "sources": {
       "ctgov": {
         "status": "ok",
-        "elapsed_s": 10.0,
+        "elapsed_s": 7.8,
         "summary": "1176 unique trials (nav18_sodium:86/86, kor_biased_mor:86/86, postop_long_acting:300/2061, cgrp_migraine:219/219, pain_china:350/778, pain_terminated_watchlist:250/1136)"
       },
       "openfda_approvals": {
         "status": "ok",
-        "elapsed_s": 4.9,
+        "elapsed_s": 3.0,
         "summary": "93 FDA approvals"
       },
       "openfda_faers": {
         "status": "ok",
-        "elapsed_s": 14.2,
+        "elapsed_s": 10.0,
         "summary": "159 FAERS signals across 14 pain drugs"
       },
       "opentargets_pdb": {
         "status": "ok",
-        "elapsed_s": 7.8,
+        "elapsed_s": 6.7,
         "summary": "14 targets (Open Targets + RCSB PDB), 0 ChEMBL IDs discovered"
       },
       "chembl": {
         "status": "ok",
-        "elapsed_s": 5.8,
+        "elapsed_s": 8.8,
         "summary": "24 ChEMBL molecules"
       },
       "europepmc": {
         "status": "ok",
-        "elapsed_s": 21.9,
+        "elapsed_s": 51.3,
         "summary": "139 Europe PMC publications"
       }
     }
@@ -28090,7 +28090,7 @@
       "source_tag": "cloud_europepmc"
     }
   ],
-  "finished_at": "2026-11-21 14:04:25 UTC",
+  "finished_at": "2026-11-22 02:28:12 UTC",
   "counts": {
     "clinical_trials": 1176,
     "fda_approvals": 93,
